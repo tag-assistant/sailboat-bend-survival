@@ -174,9 +174,8 @@ export function startGame(container: HTMLDivElement) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.shadowMap.enabled = false;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.6;
   container.appendChild(renderer.domElement);
 
@@ -191,8 +190,7 @@ export function startGame(container: HTMLDivElement) {
     hp: 100, maxHp: 100, wave: 0, kills: 0, startTime: 0,
     zombiesRemaining: 0, waveActive: false, waveDelay: 0,
     paused: false, gameOver: false, started: false,
-    attackCooldown: 0, hitFlash: 0, shakeIntensity: 0, regenTimer: 0,
-  };
+    attackCooldown: 0, hitFlash: 0, shakeIntensity: 0, regenTimer: 0 };
 
   const keys: Record<string, boolean> = {};
   const mouse = { x: 0, y: 0, locked: false };
@@ -344,15 +342,15 @@ export function startGame(container: HTMLDivElement) {
 
   // Ground
   const groundGeo = new THREE.PlaneGeometry(200, 200);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+  const groundMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
+  ground.receiveShadow = false;
   scene.add(ground);
 
   // Road
   const roadGeo = new THREE.PlaneGeometry(12, 200);
-  const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
+  const roadMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
   const road = new THREE.Mesh(roadGeo, roadMat);
   road.rotation.x = -Math.PI / 2;
   road.position.y = 0.01;
@@ -362,7 +360,7 @@ export function startGame(container: HTMLDivElement) {
   for (let z = -90; z < 90; z += 8) {
     const mark = new THREE.Mesh(
       new THREE.PlaneGeometry(0.3, 3),
-      new THREE.MeshStandardMaterial({ color: 0x666600, emissive: 0x222200 })
+      new THREE.MeshBasicMaterial({ color: 0x666600 })
     );
     mark.rotation.x = -Math.PI / 2;
     mark.position.set(0, 0.02, z);
@@ -373,10 +371,10 @@ export function startGame(container: HTMLDivElement) {
   [-7, 7].forEach(x => {
     const sidewalk = new THREE.Mesh(
       new THREE.BoxGeometry(2, 0.15, 200),
-      new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 })
+      new THREE.MeshBasicMaterial({ color: 0x333333 })
     );
     sidewalk.position.set(x, 0.075, 0);
-    sidewalk.receiveShadow = true;
+    sidewalk.receiveShadow = false;
     scene.add(sidewalk);
   });
 
@@ -387,35 +385,29 @@ export function startGame(container: HTMLDivElement) {
   // Moon light
   const moonLight = new THREE.DirectionalLight(0x334466, 0.2);
   moonLight.position.set(50, 80, 30);
-  moonLight.castShadow = true;
-  moonLight.shadow.mapSize.set(2048, 2048);
-  moonLight.shadow.camera.far = 150;
-  moonLight.shadow.camera.left = -50;
-  moonLight.shadow.camera.right = 50;
-  moonLight.shadow.camera.top = 50;
-  moonLight.shadow.camera.bottom = -50;
+  moonLight.castShadow = false;
   scene.add(moonLight);
 
   // Street lights
   function createStreetLight(x: number, z: number) {
     const pole = new THREE.Mesh(
       new THREE.CylinderGeometry(0.08, 0.1, 5, 8),
-      new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.8 })
+      new THREE.MeshBasicMaterial({ color: 0x444444 })
     );
     pole.position.set(x, 2.5, z);
-    pole.castShadow = true;
+    pole.castShadow = false;
     scene.add(pole);
 
     const arm = new THREE.Mesh(
       new THREE.BoxGeometry(1.5, 0.08, 0.08),
-      new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.8 })
+      new THREE.MeshBasicMaterial({ color: 0x444444 })
     );
     arm.position.set(x + (x > 0 ? -0.75 : 0.75), 5, z);
     scene.add(arm);
 
     const bulb = new THREE.Mesh(
       new THREE.SphereGeometry(0.15, 8, 8),
-      new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xffaa44, emissiveIntensity: 2 })
+      new THREE.MeshBasicMaterial({ color: 0xffaa44 })
     );
     bulb.position.set(x + (x > 0 ? -1.5 : 1.5), 4.9, z);
     scene.add(bulb);
@@ -423,8 +415,7 @@ export function startGame(container: HTMLDivElement) {
     const light = new THREE.PointLight(0xffaa44, 15, 25, 2);
     light.castShadow = false;
     light.position.set(x + (x > 0 ? -1.5 : 1.5), 4.8, z);
-    light.castShadow = true;
-    light.shadow.mapSize.set(512, 512);
+    light.castShadow = false;
     scene.add(light);
 
     // Light cone (volumetric fake)
@@ -444,16 +435,16 @@ export function startGame(container: HTMLDivElement) {
   function createBuilding(x: number, z: number, w: number, d: number, h: number) {
     const building = new THREE.Mesh(
       new THREE.BoxGeometry(w, h, d),
-      new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.8 })
+      new THREE.MeshBasicMaterial({ color: 0x1a1a2a })
     );
     building.position.set(x, h / 2, z);
-    building.castShadow = true;
-    building.receiveShadow = true;
+    building.castShadow = false;
+    building.receiveShadow = false;
     scene.add(building);
 
     // Windows
-    const winMat = new THREE.MeshStandardMaterial({ color: 0x334455, emissive: 0x112233, emissiveIntensity: 0.5 });
-    const winLitMat = new THREE.MeshStandardMaterial({ color: 0xffdd88, emissive: 0xffaa44, emissiveIntensity: 0.8 });
+    const winMat = new THREE.MeshBasicMaterial({ color: 0x334455 });
+    const winLitMat = new THREE.MeshBasicMaterial({ color: 0xffdd88 });
     for (let wy = 1.5; wy < h - 0.5; wy += 2.5) {
       for (let wz = z - d / 2 + 1; wz < z + d / 2; wz += 2.5) {
         const side = x > 0 ? x - w / 2 - 0.01 : x + w / 2 + 0.01;
@@ -486,17 +477,17 @@ export function startGame(container: HTMLDivElement) {
   function createPalmTree(x: number, z: number) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.12, 0.2, 6, 8),
-      new THREE.MeshStandardMaterial({ color: 0x4a3520, roughness: 0.9 })
+      new THREE.MeshBasicMaterial({ color: 0x4a3520 })
     );
     // Slight lean
     trunk.rotation.z = (Math.random() - 0.5) * 0.2;
     trunk.rotation.x = (Math.random() - 0.5) * 0.1;
     trunk.position.set(x, 3, z);
-    trunk.castShadow = true;
+    trunk.castShadow = false;
     scene.add(trunk);
 
     // Fronds
-    const frondMat = new THREE.MeshStandardMaterial({ color: 0x1a4a1a, side: THREE.DoubleSide });
+    const frondMat = new THREE.MeshBasicMaterial({ color: 0x1a4a1a, side: THREE.DoubleSide });
     for (let i = 0; i < 7; i++) {
       const frond = new THREE.Mesh(
         new THREE.PlaneGeometry(0.6, 3),
@@ -509,7 +500,7 @@ export function startGame(container: HTMLDivElement) {
     }
 
     // Coconuts
-    const coconutMat = new THREE.MeshStandardMaterial({ color: 0x4a2a0a });
+    const coconutMat = new THREE.MeshBasicMaterial({ color: 0x4a2a0a });
     for (let i = 0; i < 3; i++) {
       const coconut = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), coconutMat);
       const a = Math.random() * Math.PI * 2;
@@ -530,27 +521,27 @@ export function startGame(container: HTMLDivElement) {
     const car = new THREE.Group();
 
     // Body
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.9, roughness: 0.2 });
+    const bodyMat = new THREE.MeshBasicMaterial({ color: 0x1a1a2a });
     const body = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4.5), bodyMat);
     body.position.y = 0.6;
-    body.castShadow = true;
+    body.castShadow = false;
     car.add(body);
 
     // Roof
     const roof = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.6, 2.2), bodyMat);
     roof.position.set(0, 1.2, -0.3);
-    roof.castShadow = true;
+    roof.castShadow = false;
     car.add(roof);
 
     // Windshield
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x445566, metalness: 0.3, roughness: 0.1, transparent: true, opacity: 0.6 });
+    const glassMat = new THREE.MeshBasicMaterial({ color: 0x445566, transparent: true, opacity: 0.6 });
     const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.6), glassMat);
     windshield.position.set(0, 1.1, 0.8);
     windshield.rotation.x = -0.3;
     car.add(windshield);
 
     // Headlights
-    const headlightMat = new THREE.MeshStandardMaterial({ color: 0xffffcc, emissive: 0xffffcc, emissiveIntensity: 0.5 });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xffffcc });
     [-0.7, 0.7].forEach(xo => {
       const hl = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.05), headlightMat);
       hl.position.set(xo, 0.6, 2.28);
@@ -558,7 +549,7 @@ export function startGame(container: HTMLDivElement) {
     });
 
     // Taillights
-    const taillightMat = new THREE.MeshStandardMaterial({ color: 0xff2200, emissive: 0xff0000, emissiveIntensity: 0.3 });
+    const taillightMat = new THREE.MeshBasicMaterial({ color: 0xff2200 });
     [-0.7, 0.7].forEach(xo => {
       const tl = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.05), taillightMat);
       tl.position.set(xo, 0.6, -2.28);
@@ -566,7 +557,7 @@ export function startGame(container: HTMLDivElement) {
     });
 
     // Wheels
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+    const wheelMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
     [[-0.9, 1.4], [-0.9, -1.4], [0.9, 1.4], [0.9, -1.4]].forEach(([wx, wz]) => {
       const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.25, 12), wheelMat);
       wheel.rotation.z = Math.PI / 2;
@@ -577,7 +568,7 @@ export function startGame(container: HTMLDivElement) {
     // M3 badge glow
     const badge = new THREE.Mesh(
       new THREE.PlaneGeometry(0.3, 0.12),
-      new THREE.MeshStandardMaterial({ color: 0x0066ff, emissive: 0x0044ff, emissiveIntensity: 0.8 })
+      new THREE.MeshBasicMaterial({ color: 0x0066ff })
     );
     badge.position.set(0, 0.7, 2.28);
     car.add(badge);
@@ -595,37 +586,37 @@ export function startGame(container: HTMLDivElement) {
   scene.add(player);
 
   // Player body
-  const playerBodyMat = new THREE.MeshStandardMaterial({ color: 0x2255aa, roughness: 0.6 });
+  const playerBodyMat = new THREE.MeshBasicMaterial({ color: 0x2255aa });
   const playerBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.8, 8, 16), playerBodyMat);
   playerBody.position.y = 1.0;
-  playerBody.castShadow = true;
+  playerBody.castShadow = false;
   player.add(playerBody);
 
   // Player head
   const playerHead = new THREE.Mesh(
     new THREE.SphereGeometry(0.22, 12, 12),
-    new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.5 })
+    new THREE.MeshBasicMaterial({ color: 0xddaa88 })
   );
   playerHead.position.y = 1.7;
-  playerHead.castShadow = true;
+  playerHead.castShadow = false;
   player.add(playerHead);
 
   // Sword
   const sword = new THREE.Group();
   const swordBlade = new THREE.Mesh(
     new THREE.BoxGeometry(0.06, 1.0, 0.02),
-    new THREE.MeshStandardMaterial({ color: 0xaaaacc, metalness: 0.9, roughness: 0.2 })
+    new THREE.MeshBasicMaterial({ color: 0xaaaacc })
   );
   swordBlade.position.y = 0.5;
   sword.add(swordBlade);
   const swordHandle = new THREE.Mesh(
     new THREE.BoxGeometry(0.08, 0.25, 0.06),
-    new THREE.MeshStandardMaterial({ color: 0x4a2a0a })
+    new THREE.MeshBasicMaterial({ color: 0x4a2a0a })
   );
   sword.add(swordHandle);
   const swordGuard = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.04, 0.06),
-    new THREE.MeshStandardMaterial({ color: 0xccaa44, metalness: 0.8 })
+    new THREE.MeshBasicMaterial({ color: 0xccaa44 })
   );
   swordGuard.position.y = 0.12;
   sword.add(swordGuard);
@@ -652,23 +643,23 @@ export function startGame(container: HTMLDivElement) {
 
     const zombieGreen = 0x2a4a2a;
     const darkGreen = 0x1a3a1a;
-    const mat = new THREE.MeshStandardMaterial({ color: isBoss ? 0x4a1a1a : zombieGreen, roughness: 0.7 });
-    const matDark = new THREE.MeshStandardMaterial({ color: isBoss ? 0x3a0a0a : darkGreen, roughness: 0.7 });
+    const mat = new THREE.MeshBasicMaterial({ color: isBoss ? 0x4a1a1a : zombieGreen });
+    const matDark = new THREE.MeshBasicMaterial({ color: isBoss ? 0x3a0a0a : darkGreen });
 
     // Body
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.3), mat);
     body.position.y = 1.1;
-    body.castShadow = true;
+    body.castShadow = false;
     group.add(body);
 
     // Head
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), mat);
     head.position.y = 1.7;
-    head.castShadow = true;
+    head.castShadow = false;
     group.add(head);
 
     // Eyes
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: isBoss ? 3 : 1 });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000});
     [-0.08, 0.08].forEach(ex => {
       const eye = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), eyeMat);
       eye.position.set(ex, 1.75, 0.18);
@@ -678,28 +669,28 @@ export function startGame(container: HTMLDivElement) {
     // Arms
     const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), matDark);
     armL.position.set(-0.35, 1.05, 0);
-    armL.castShadow = true;
+    armL.castShadow = false;
     group.add(armL);
     const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), matDark);
     armR.position.set(0.35, 1.05, 0);
-    armR.castShadow = true;
+    armR.castShadow = false;
     group.add(armR);
 
     // Legs
     const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), matDark);
     legL.position.set(-0.12, 0.3, 0);
-    legL.castShadow = true;
+    legL.castShadow = false;
     group.add(legL);
     const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), matDark);
     legR.position.set(0.12, 0.3, 0);
-    legR.castShadow = true;
+    legR.castShadow = false;
     group.add(legR);
 
     if (isBoss) {
       // Boss crown
       const crown = new THREE.Mesh(
         new THREE.ConeGeometry(0.25, 0.3, 5),
-        new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0xff6600, emissiveIntensity: 1, metalness: 0.8 })
+        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
       );
       crown.position.y = 2.0;
       group.add(crown);
@@ -736,8 +727,7 @@ export function startGame(container: HTMLDivElement) {
           Math.random() * speed * 0.7,
           (Math.random() - 0.5) * speed
         ),
-        life: 0.5 + Math.random() * 0.5,
-      });
+        life: 0.5 + Math.random() * 0.5 });
     }
   }
 
@@ -995,7 +985,7 @@ export function startGame(container: HTMLDivElement) {
         z.mesh.rotation.x = (1 - z.deathTimer) * Math.PI / 2;
         z.mesh.position.y = -z.deathTimer * 0.5;
         z.mesh.traverse(child => {
-          if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshBasicMaterial) {
             child.material.transparent = true;
             child.material.opacity = Math.max(0, z.deathTimer!);
           }
