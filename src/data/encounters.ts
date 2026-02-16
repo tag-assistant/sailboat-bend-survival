@@ -435,3 +435,136 @@ export function getRandomEncounters(locationId: string, count: number): Encounte
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
+
+// === BONUS ENCOUNTERS (added for replayability) ===
+
+const bonusMorning: Encounter[] = [
+  {
+    location: 'morning',
+    emoji: '🏷️',
+    title: 'Tag Goes Rogue',
+    description: 'Your AI assistant Tag has been running all night. He shipped 25 items, created 2 apps, and is now asking permission to register a domain.',
+    choices: [
+      { text: 'Check the project board (impressed)', effects: { vibe: 15 }, result: '25 items shipped overnight?! Tag is a machine. Your board has never been this clean.' },
+      { text: 'Panic — what did he deploy?!', effects: { vibe: -5, caffeine: -10 }, result: 'You frantically check Vercel. Everything is fine. Tag left you a morning summary. Relax.' },
+      { text: '"Tag, go to sleep"', effects: { vibe: 5 }, result: 'Tag\'s sleep cron fires in 20 minutes anyway. He ignores you and ships one more PR.' },
+    ],
+  },
+  {
+    location: 'morning',
+    emoji: '🐊 ',
+    title: 'Pool Gator',
+    description: 'You look out the window. There\'s a 4-foot gator in the apartment pool. Classic Sailboat Bend.',
+    choices: [
+      { text: 'Call FWC', effects: { vibe: -5 }, result: 'FWC says they\'ll be there in 3-5 business days. The gator has already set up a lawn chair.' },
+      { text: 'Name him and move on', effects: { vibe: 10 }, result: 'You name him "Copilot" because he also showed up uninvited and won\'t leave.' },
+      { text: 'Take a photo for Jake', effects: { vibe: 5 }, result: 'Jake wants to wrestle it. You say no. Jake is disappointed.' },
+    ],
+  },
+];
+
+const bonusCommute: Encounter[] = [
+  {
+    location: 'commute',
+    emoji: '🏎️',
+    title: 'M3 Launch Control',
+    description: 'Empty stretch of A1A. The M3\'s launch control is calling your name.',
+    choices: [
+      { text: 'SEND IT', effects: { vibe: 20, cash: -50 }, result: '0-60 in 3.8 seconds. The Tanzanite Blue blur made a Tesla owner cry. Worth every penny of the future speeding ticket.' },
+      { text: 'Drive responsibly', effects: { vibe: -5 }, result: 'You drive 35 in a 35. A Prius passes you. This is the darkest timeline.' },
+      { text: 'Rev it at a red light', effects: { vibe: 10 }, result: 'The S55 inline-6 screams. A nearby pedestrian drops their coffee. Art.' },
+    ],
+  },
+  {
+    location: 'commute',
+    emoji: '☔ ',
+    title: 'Surprise Downpour',
+    description: 'Florida does its thing. Biblical rain out of nowhere. Your wipers can\'t keep up.',
+    choices: [
+      { text: 'Pull over and wait', effects: { vibe: -5, caffeine: -5 }, result: 'Smart move. 10 minutes later it\'s sunny again. Florida.' },
+      { text: 'Power through', effects: { vibe: 5 }, result: 'AWD saves the day. You arrive slightly damp but alive.' },
+      { text: 'Take the back roads', effects: { vibe: -10 }, result: 'The back roads flood. Your M3 is now a boat. This is not what "Sailboat Bend" means.' },
+    ],
+  },
+];
+
+const bonusWork: Encounter[] = [
+  {
+    location: 'work',
+    emoji: '🤖 ',
+    title: 'Copilot Rebellion',
+    description: 'GitHub Copilot starts suggesting code in a language you\'ve never seen. The comments are in Latin.',
+    choices: [
+      { text: 'Accept all suggestions', effects: { vibe: -10 }, result: 'The code compiles. Nobody knows why. You don\'t touch it again.' },
+      { text: 'File an internal bug', effects: { vibe: 5, caffeine: -5 }, result: 'The ML team says "working as intended." The Latin was a feature.' },
+      { text: 'Ask Tag to investigate', effects: { vibe: 10 }, result: 'Tag finds the root cause in 30 seconds. It was a training data issue. He opens a PR.' },
+    ],
+  },
+  {
+    location: 'work',
+    emoji: '📊 ',
+    title: 'Surprise Demo',
+    description: 'Your manager pings: "Can you demo Actions to a Fortune 500 in 15 minutes?"',
+    choices: [
+      { text: 'Nail it', effects: { vibe: 25, caffeine: -15 }, result: 'Flawless demo. The customer signs a 6-figure deal. Your manager sends a 🎉 in Slack.' },
+      { text: 'Wing it with confidence', effects: { vibe: 10 }, result: 'You BS your way through. They\'re impressed enough. "Let me get back to you on that."' },
+      { text: 'Say you\'re in another meeting', effects: { vibe: -10 }, result: 'Your calendar is empty and everyone knows it.' },
+    ],
+  },
+];
+
+const bonusGolf: Encounter[] = [
+  {
+    location: 'golf',
+    emoji: '🕳️',
+    title: 'Hole in One?!',
+    description: 'Par 3, 155 yards. Your 7-iron shot is tracking... tracking...',
+    choices: [
+      { text: 'Hold your breath', effects: { vibe: 30 }, result: 'It hits the pin! ...and bounces 15 feet away. SO CLOSE. But still your best shot ever.' },
+      { text: 'Start celebrating early', effects: { vibe: -15 }, result: 'It lands in the bunker. The golf gods punish hubris.' },
+      { text: 'Play it cool', effects: { vibe: 20 }, result: 'It rolls to 3 feet. Tap-in birdie. You pretend this happens all the time.' },
+    ],
+  },
+];
+
+const bonusHappyHour: Encounter[] = [
+  {
+    location: 'happyhour',
+    emoji: '🌮 ',
+    title: 'El Paisa Call',
+    description: 'Taqueria El Paisa is 5 minutes away. Their al pastor tacos are calling.',
+    choices: [
+      { text: 'TACOS NOW', effects: { vibe: 20, hunger: 40, cash: -15 }, result: 'Best decision of the day. 4 al pastor tacos, extra lime, green salsa. Life is good.' },
+      { text: 'Stay at the bar', effects: { vibe: 5, hunger: -10, cash: -20 }, result: 'You order bar food instead. It\'s fine. But it\'s not El Paisa.' },
+      { text: 'Uber Eats it to the bar', effects: { vibe: 10, hunger: 30, cash: -30 }, result: 'The delivery driver finds you at the bar. Power move. Expensive power move.' },
+    ],
+  },
+];
+
+const bonusNight: Encounter[] = [
+  {
+    location: 'night',
+    emoji: '🎮 ',
+    title: 'Mythic+ Key',
+    description: 'Your WoW guild is running a +20 key. They need a healer. Ariesboi\'s time to shine.',
+    choices: [
+      { text: 'Join the group', effects: { vibe: 20, caffeine: -10 }, result: 'You time the key with 2 seconds left. The Discord erupts. ARIESBOI DIFF.' },
+      { text: 'Too tired, pass', effects: { vibe: -10 }, result: 'They wipe on the last boss without you. Group chat is salty. Guilt.' },
+      { text: 'Join but play DPS', effects: { vibe: 5 }, result: 'You queue as Droodlez instead. Guardian druid DPS is... creative.' },
+    ],
+  },
+  {
+    location: 'night',
+    emoji: '🐱 ',
+    title: 'Caymus FaceTime',
+    description: 'Mom sends a FaceTime. Caymus is sitting on dad\'s keyboard, refusing to move.',
+    choices: [
+      { text: 'Answer and talk to the cat', effects: { vibe: 15 }, result: 'Caymus meows once, then walks away. Classic cat. But the meow was everything.' },
+      { text: 'Text back "pet him for me"', effects: { vibe: 10 }, result: 'Mom sends a video of Caymus being pet. He purrs. Your heart grows three sizes.' },
+      { text: 'Send a selfie to Caymus', effects: { vibe: 5 }, result: 'Mom holds the phone up to Caymus. He stares blankly. He doesn\'t know what a phone is.' },
+    ],
+  },
+];
+
+// Register bonus encounters
+ENCOUNTERS.push(...bonusMorning, ...bonusCommute, ...bonusWork, ...bonusGolf, ...bonusHappyHour, ...bonusNight);
