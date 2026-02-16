@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-build:
     runs-on: ubuntu-latest
@@ -19,6 +23,9 @@ jobs:
       - run: npm run build
 
   deploy-preview:
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     if: github.event_name == 'pull_request'
     needs: test-build
     runs-on: ubuntu-latest
@@ -68,6 +75,9 @@ jobs:
             }
 
   deploy-production:
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test-build
     runs-on: ubuntu-latest
