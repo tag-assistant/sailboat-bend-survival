@@ -4,7 +4,7 @@ A roguelike survival browser game where you play as a Fort Lauderdale tech bro n
 
 ## 🎮 Play
 
-**[Play Now →](https://sailboat-bend-survival.vercel.app)**
+**[Play Now →](https://sbs-deploy.vercel.app)**
 
 ## Game Mechanics
 
