@@ -1,5 +1,8 @@
 # Sailboat Bend Survival ⛵
 
+[![CI/CD](https://github.com/tag-assistant/sailboat-bend-survival/actions/workflows/ci.yml/badge.svg)](https://github.com/tag-assistant/sailboat-bend-survival/actions/workflows/ci.yml)
+[![Deployment](https://img.shields.io/badge/production-live-brightgreen)](https://sbs-v2.vercel.app)
+
 A roguelike survival browser game where you play as a Fort Lauderdale tech bro navigating a single day — from your Sailboat Bend apartment to midnight. Survive encounters with Florida Man, Copilot bugs, golf cart drama, and happy hour chaos.
 
 ## 🎮 Play

@@ -18,11 +18,70 @@ jobs:
       - run: npx tsc --noEmit || true
       - run: npm run build
 
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: test-build
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | grep -oE 'https://[^ ]+\.vercel\.app')
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 Preview deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            if (!url) return;
+            const body = `## 🔍 Preview Deployment\n\n**URL:** ${url}\n\n_Automatically deployed from this PR._`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c => c.body.includes('Preview Deployment') && c.user.type === 'Bot');
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: botComment.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
   deploy-production:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test-build
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://sbs-v2.vercel.app
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - run: npm ci
-      - run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Production
+        run: |
+          npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "### ✅ Production deployed!" >> $GITHUB_STEP_SUMMARY
