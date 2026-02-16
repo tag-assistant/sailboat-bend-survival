@@ -239,7 +239,7 @@ export function startGame(container: HTMLDivElement) {
 
   // Start screen
   const startScreen = document.createElement("div");
-  startScreen.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;";
+  startScreen.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;z-index:100;";
   startScreen.innerHTML = `
     <div style="color:#ff3333;font-size:48px;font-weight:bold;text-shadow:0 0 30px #ff0000;margin-bottom:10px;letter-spacing:4px;">SAILBOAT BEND</div>
     <div style="color:#ff6666;font-size:28px;text-shadow:0 0 15px #ff0000;margin-bottom:40px;letter-spacing:8px;">SURVIVAL</div>
@@ -248,12 +248,12 @@ export function startGame(container: HTMLDivElement) {
     <div style="color:#ff4444;font-size:22px;animation:pulse 1.5s ease-in-out infinite;">CLICK TO BEGIN</div>
     <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
   `;
-  hud.appendChild(startScreen);
+  container.appendChild(startScreen);
 
   // Game over screen
   const gameOverScreen = document.createElement("div");
-  gameOverScreen.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);display:none;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;";
-  hud.appendChild(gameOverScreen);
+  gameOverScreen.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);display:none;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;z-index:100;";
+  container.appendChild(gameOverScreen);
 
   // Pause screen
   const pauseScreen = document.createElement("div");
@@ -265,7 +265,7 @@ export function startGame(container: HTMLDivElement) {
     <div style="color:#aaa;font-size:16px;">Click — Attack</div>
     <div style="color:#aaa;font-size:16px;margin-top:20px;">ESC — Resume</div>
   `;
-  hud.appendChild(pauseScreen);
+  container.appendChild(pauseScreen);
 
   // Mobile controls
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
