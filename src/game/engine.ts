@@ -421,6 +421,7 @@ export function startGame(container: HTMLDivElement) {
     scene.add(bulb);
 
     const light = new THREE.PointLight(0xffaa44, 15, 25, 2);
+    light.castShadow = false;
     light.position.set(x + (x > 0 ? -1.5 : 1.5), 4.8, z);
     light.castShadow = true;
     light.shadow.mapSize.set(512, 512);
@@ -434,7 +435,7 @@ export function startGame(container: HTMLDivElement) {
     scene.add(cone);
   }
 
-  for (let z = -80; z <= 80; z += 25) {
+  for (let z = -75; z <= 75; z += 50) {
     createStreetLight(-9, z);
     createStreetLight(9, z);
   }
@@ -633,6 +634,7 @@ export function startGame(container: HTMLDivElement) {
 
   // Player point light
   const playerLight = new THREE.PointLight(0x4488ff, 2, 8, 2);
+  playerLight.castShadow = false;
   playerLight.position.y = 1.5;
   player.add(playerLight);
 
