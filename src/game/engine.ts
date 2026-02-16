@@ -820,21 +820,26 @@ export function startGame(container: HTMLDivElement) {
     }
   });
 
+  // Start game on clicking the start screen
+  startScreen.addEventListener("click", () => {
+    if (state.started) return;
+    state.started = true;
+    state.startTime = performance.now();
+    startScreen.style.display = "none";
+    audio.init();
+    if (!isMobile) renderer.domElement.requestPointerLock?.();
+    startWave();
+  });
+
+  // Restart game on clicking game over screen
+  gameOverScreen.addEventListener("click", () => {
+    if (!state.gameOver) return;
+    restartGame();
+  });
+
+  // Canvas click = attack (only during active gameplay)
   renderer.domElement.addEventListener("click", () => {
-    if (!state.started) {
-      state.started = true;
-      state.startTime = performance.now();
-      startScreen.style.display = "none";
-      audio.init();
-      if (!isMobile) renderer.domElement.requestPointerLock?.();
-      startWave();
-      return;
-    }
-    if (state.gameOver) {
-      restartGame();
-      return;
-    }
-    if (state.paused) return;
+    if (!state.started || state.gameOver || state.paused) return;
     if (!isMobile) renderer.domElement.requestPointerLock?.();
     performAttack();
   });
